@@ -160,10 +160,10 @@ export default {
       this.is_check_list = [];
       this.added_list = [];
       let path = "";
-      if (process.env.VUE_APP_USE_NGROK === "true") {
-        path = "https://mylittlecellar-scrap.herokuapp.com" + "/wine_decider";
-      } else {
+      if (process.env.NODE_ENV === "development") {
         path = "http://localhost:8001/wine_decider";
+      } else {
+        path = "https://mylittlecellar-scrap.herokuapp.com/wine_decider";
       }
       let time_init = Date.now();
       this.axiosLoop(path, { query: this.query }, time_init);
