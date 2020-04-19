@@ -161,7 +161,7 @@ export default {
       this.added_list = [];
       let path = "";
       if (process.env.VUE_APP_USE_NGROK === "true") {
-        path = process.env.VUE_APP_NGROK_SCRAP + "/wine_decider";
+        path = "https://mylittlecellar-scrap.herokuapp.com" + "/wine_decider";
       } else {
         path = "http://localhost:8001/wine_decider";
       }
