@@ -2,7 +2,7 @@ import Vue from 'vue';
 import axios from 'axios';
 import router from '../router';
 
-let authUrl = 'https://mylittlecellar-back.herokuappp.com/auth'
+let authUrl = 'https://mylittlecellar-back.herokuapp.com/auth'
 if (process.env.NODE_ENV === 'development') {
   authUrl = 'http://localhost:8000/auth'
 }
