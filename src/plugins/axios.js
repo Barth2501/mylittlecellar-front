@@ -9,7 +9,7 @@ if (process.env.NODE_ENV === 'development') {
     axios.defaults.baseURL = 'http://localhost:8000/api/v1'
   }
 } else {
-  axios.defaults.baseURL = 'https://mylittlecellar-back.herokuapp.com:9559/api/v1'
+  axios.defaults.baseURL = 'https://mylittlecellar-back.herokuapp.com/api/v1'
 }
 
 Vue.prototype.$http = axios
