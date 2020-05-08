@@ -11,7 +11,7 @@
           justify="center"
         >
           <v-col xl="8" lg="10" md="12">
-            <img src="../assets/wine_glass.png" class="logo px-10 mb-10" />
+            <img src="../assets/custom_Logo.png" class="logo px-10 mb-10" />
 
             <v-text-field
               background-color="rgba(187, 62, 45, 0.28)"
@@ -240,7 +240,7 @@ export default {
 
 .auth-left {
   background-color: #343949;
-  background-image: url("../assets/background.png");
+  background-image: url("../assets/custom_background.png");
   background-size: cover;
   background-repeat: repeat;
 }

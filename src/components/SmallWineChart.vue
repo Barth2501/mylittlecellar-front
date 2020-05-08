@@ -12,8 +12,8 @@
     :type="type"
     :auto-line-width="autoLineWidth"
     auto-draw
-    height=100
-    label-size=15
+    :height="height"
+    :label-size="label_size"
   ></v-sparkline>
 </template>
 <script>
@@ -27,10 +27,9 @@ const gradients = [
   ]
 export default {
     props: [
-        "wineData"
+        "wineData","label_size","height",'width'
     ],
     data: () => ({
-        width: 8,
       radius: 15,
       padding: 18,
       lineCap: 'round',

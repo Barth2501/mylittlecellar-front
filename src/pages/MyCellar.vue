@@ -3,31 +3,11 @@
     <v-card>
       <v-toolbar elevation="0" color="#c84431d9">
         <v-toolbar-title>
-          <b>My Cellar</b>
+          <b>Livret de Cave</b>
         </v-toolbar-title>
       </v-toolbar>
-      <v-card class="d-flex justify-center" elevation="0" color="#d05f4f40">
-        <v-banner color="#ffffff00">
-          <v-row class="d-flex mx-auto ml-5">
-            <img src="../assets/wine.png" height="100" width="100" contain />
-            <v-col class="d-flex flex-column ml-5">
-              <div>
-                <h3>What are you looking for?</h3>
-              </div>
-              <div>
-                <v-row class="d-flex align-center ml-1">
-                  <v-text-field class="max-auto" v-model="query" label="Area or Wine or..."></v-text-field>
-                  <v-btn @click="onSend" icon>
-                    <v-icon>mdi-magnify</v-icon>
-                  </v-btn>
-                </v-row>
-              </div>
-            </v-col>
-          </v-row>
-        </v-banner>
-      </v-card>
     </v-card>
-    
+
     <v-col v-if="loading">
       <v-row class="d-flex justify-center">
         <h2>Your wines are loading ...</h2>
@@ -40,7 +20,7 @@
     </v-col>
 
     <v-card
-      v-if="wines===undefined && !loading"
+      v-if="regions===undefined && !loading"
       class="d-flex justify-center mt-5"
       elevation="0"
       color="#d05f4f40"
@@ -59,62 +39,125 @@
         </v-col>
       </v-banner>
     </v-card>
-
+    <!-- <v-card v-else class="mt-5">
+      <v-list color="#d05f4f40">
+        <v-list-item
+          v-for="(region,region_id,index) in regions"
+          :key="`region-${index}`"
+          @click="getMyAreas(region_id)"
+        >
+          <v-list-item-content>
+            <v-list-item-title v-text="region.name"></v-list-item-title>
+          </v-list-item-content>
+          <v-card>
+            <v-list>
+              <v-list-item v-for="(area,area_id,index) in region.areas" :key="`area-${index}`">
+                <v-list-item-content>
+                  <v-list-item-title v-text="area.name"></v-list-item-title>
+                </v-list-item-content>
+              </v-list-item>
+            </v-list>
+          </v-card>
+        </v-list-item>
+      </v-list>
+    </v-card>-->
     <v-card v-else class="mt-5">
       <v-list color="#d05f4f40">
-        <template v-for="(region,value,index) in wines">
-          <v-list-item :key="`region-${index}`">
-            <v-list-group color="#bb3e2d" prepend-icon="mdi-fruit-grapes">
+        <template v-for="(region,region_id,index) in regions">
+          <div class='d-flex' :key="`region-${index}`">
+          <v-list-item :key="`region-${index}`"  class='justify-space-between'>
+            <v-list-group class="grow" color="#bb3e2d" prepend-icon="mdi-fruit-grapes">
               <template v-slot:activator>
-                <v-list-item-content>
-                  <v-list-item-title v-text="value"></v-list-item-title>
+                <v-list-item-content class="region" @click="getMyAreas(region_id)">
+                  <v-list-item-title v-text="region.name"></v-list-item-title>
                 </v-list-item-content>
               </template>
-              <template v-for="(area,value,index) in region">
-                <v-list-item :key="`area-${index}`">
-                  <v-list-group prepend-icon="mdi-fruit-grapes" sub-group>
-                    <template v-slot:activator>
-                      <v-list-item-content>
-                        <v-list-item-title v-text="value"></v-list-item-title>
-                      </v-list-item-content>
-                    </template>
-                    <template v-for="(winery,value,index) in area">
-                      <v-list-item :key="`winery-${index}`">
-                        <v-list-group no-action sub-group>
-                          <template v-slot:activator>
-                            <v-list-item-content>
-                              <v-list-item-title v-text="value"></v-list-item-title>
-                              <!-- <v-list-item-text v-text="winery.description" /> -->
-                            </v-list-item-content>
-                          </template>
-                          <template v-for="(wine,value, index) in winery">
-                            <v-list-item :key="`wine-${index}`">
-                              <v-list-item-content>
-                                <v-list-item-title v-text="value"></v-list-item-title>
-                                <v-list-item-subtitle
-                                  v-for="(vintage,value,index) in wine"
-                                  :key="`vintage-${index}`"
-                                >
-                                  <v-row class="d-flex justify-space-around">
-                                    <v-text-area class="mr-5">{{ value }}</v-text-area>
-                                    <v-text-area>{{ vintage.number}} bottle(s) remaining</v-text-area>
-                                    <v-btn small>Modify</v-btn>
-                                  </v-row>
-                                </v-list-item-subtitle>
-                              </v-list-item-content>
-                            </v-list-item>
-                            <v-divider :key="value"></v-divider>
-                          </template>
-                        </v-list-group>
-                      </v-list-item>
-                      <v-divider :key="value"></v-divider>
-                    </template>
-                  </v-list-group>
-                </v-list-item>
-                <v-divider :key="value"></v-divider>
-              </template>
+              <div v-if="!renderAreas">
+                <v-col>
+                  <v-progress-linear color="deep-purple accent-4" indeterminate rounded height="6"></v-progress-linear>
+                </v-col>
+              </div>
+              <div v-else>
+                <template v-for="(area,area_id,index) in region.areas">
+                  <div class='d-flex' :key="`area-${index}`">
+                  <v-list-item :key="`area-${index}`">
+                    <v-list-group class="grow area-width" prepend-icon="mdi-fruit-grapes" sub-group>
+                      <template v-slot:activator>
+                        <v-list-item-content @click="getMyWineries(area_id, region_id)">
+                          <v-list-item-title v-text="area.name"></v-list-item-title>
+                        </v-list-item-content>
+                      </template>
+                      <div v-if="!renderWineries">
+                        <v-col>
+                          <v-progress-linear
+                            color="deep-purple accent-4"
+                            indeterminate
+                            rounded
+                            height="6"
+                          ></v-progress-linear>
+                        </v-col>
+                      </div>
+                      <div v-else>
+                        <template v-for="(winery,winery_id,index) in area.wineries">
+                          <div class='d-flex' :key="`winery-${index}`">
+                          <v-list-item
+                            :key="`winery-${index}`"
+                          >
+                            <v-list-group class="grow winery-width" no-action sub-group>
+                              <template v-slot:activator>
+                                <v-list-item-content @click="getMyWines(winery_id, area_id, region_id)">
+                                  <v-list-item-title v-text="winery.name"></v-list-item-title>
+                                  <!-- <v-list-item-text v-text="winery.description" /> -->
+                                </v-list-item-content>
+                              </template>
+                              <div v-if="!renderWines">
+                                <v-col>
+                                  <v-progress-linear
+                                    color="deep-purple accent-4"
+                                    indeterminate
+                                    rounded
+                                    height="6"
+                                  ></v-progress-linear>
+                                </v-col>
+                              </div>
+                              <div v-else >
+                                <template v-for="(wine,value, index) in winery.wines">
+                                  <v-list-item :key="`wine-${index}`">
+                                    <v-list-item-content>
+                                      <v-list-item-title v-text="value"></v-list-item-title>
+                                      <v-list-item-subtitle
+                                        v-for="(vintage,value,index) in wine"
+                                        :key="`vintage-${index}`"
+                                      >
+                                        <v-row class="d-flex justify-space-around">
+                                          <h5 class="mr-5">{{ value }}</h5>
+                                          <h5>{{ vintage.number}} bouteilles restantes</h5>
+                                          <v-btn small>Modify</v-btn>
+                                        </v-row>
+                                      </v-list-item-subtitle>
+                                    </v-list-item-content>
+                                  </v-list-item>
+                                  <v-divider :key="value"></v-divider>
+                                </template>
+                              </div>
+                            </v-list-group>
+                          </v-list-item>
+                          <v-btn class="mt-2 mr-5" @click="$router.push('/wineries/'+winery.id)"><h5>Voir le domaine</h5> </v-btn>
+                          </div>
+                          <v-divider :key="index"></v-divider>
+                        </template>
+                      </div>
+                    </v-list-group>
+                  </v-list-item>
+                  <v-btn class="mt-2 mr-5" @click="$router.push('/areas/'+area.name)"><h5>Voir l'appellation</h5> </v-btn>
+                  </div>
+                  <v-divider :key="index"></v-divider>
+                </template>
+              </div>
             </v-list-group>
           </v-list-item>
+            <v-btn class="mt-2 mr-5" @click="$router.push('/regions/'+region.name)"><h5>Voir la région</h5> </v-btn>
+          </div>
           <v-divider :key="index"></v-divider>
         </template>
       </v-list>
@@ -181,7 +224,11 @@ export default {
     currentCellar: undefined,
     nbBottles: 0,
     loading: true,
-    interval: 0
+    interval: 0,
+    regions: undefined,
+    renderAreas: false,
+    renderWineries: false,
+    renderWines: false
   }),
   mounted() {
     if (localStorage.getItem("current_cellar")) {
@@ -193,30 +240,83 @@ export default {
     }
   },
   methods: {
-    getMyWines() {
-      axios
-        .get("/mycellar", {
-          headers: { current_cellar_id: this.currentCellar.id }
-        })
-        .then(res => {
-          console.log(res.data.my_wines);
-          this.wines = res.data.my_wines;
-          this.loading = false;
-          clearInterval(this.interval);
-        });
+    async getMyRegions() {
+      const res = await axios.get("/myregions", {
+        headers: { current_cellar_id: this.currentCellar.id }
+      });
+      console.log(res.data);
+      this.regions = res.data;
+      this.loading = false;
     },
+    async getMyAreas(region_id) {
+      if (this.regions[region_id]["areas"] === undefined) {
+        this.renderAreas = false;
+        const res = await axios.get("/myareas/" + region_id, {
+          headers: { current_cellar_id: this.currentCellar.id }
+        });
+        console.log(res.data);
+        this.regions[region_id]["areas"] = res.data;
+        this.$nextTick(() => {
+          this.renderAreas = true;
+        });
+      }
+    },
+    async getMyWineries(area_id, region_id) {
+      if (this.regions[region_id]["areas"][area_id]["wineries"] === undefined) {
+        this.renderWineries = false;
+        const res = await axios.get("/mywineries/" + area_id, {
+          headers: { current_cellar_id: this.currentCellar.id }
+        });
+        console.log(res.data);
+        this.regions[region_id]["areas"][area_id]["wineries"] = res.data;
+        this.$nextTick(() => {
+          this.renderWineries = true;
+        });
+      }
+    },
+    async getMyWines(winery_id, area_id, region_id) {
+      if (
+        this.regions[region_id]["areas"][area_id]["wineries"][winery_id][
+          "wines"
+        ] === undefined
+      ) {
+        this.renderWines = false;
+        const res = await axios.get("/mywines/" + winery_id, {
+          headers: { current_cellar_id: this.currentCellar.id }
+        });
+        console.log(res.data);
+        this.regions[region_id]["areas"][area_id]["wineries"][winery_id][
+          "wines"
+        ] = res.data;
+        this.$nextTick(() => {
+          this.renderWines = true;
+        });
+      }
+    },
+    // getMyWines() {
+    //   axios
+    //     .get("/mycellar", {
+    //       headers: { current_cellar_id: this.currentCellar.id }
+    //     })
+    //     .then(res => {
+    //       console.log(res.data.my_wines);
+    //       this.wines = res.data.my_wines;
+    //       this.loading = false;
+    //       clearInterval(this.interval);
+    //     });
+    // },
     winesLoading() {
-      if (this.loading) {
-        this.interval = setInterval(() => {
+      this.interval = setInterval(() => {
+        if (this.loading) {
           this.nbBottles += 1;
           console.log(this.nbBottles);
-        }, 700);
-      }
+        }
+      }, 700);
     }
   },
   watch: {
     currentCellar: function() {
-      this.getMyWines();
+      this.getMyRegions();
     }
   },
   created: function() {
@@ -227,5 +327,21 @@ export default {
 <style scoped>
 .auth {
   background-color: #9e9e9e24 !important;
+}
+.grow {
+  flex-grow: inherit;
+  max-width: fit-content;
+}
+.shrink {
+  flex-grow: initial;
+}
+.region {
+  border-bottom: solid;
+}
+.area-width {
+  min-width: 17vw;
+}
+.winery-width {
+  min-width: 26vw;
 }
 </style>

@@ -3,44 +3,76 @@
     <v-card outlined color="transparent">
       <v-card-title>Repartition de la cave en région</v-card-title>
       <v-card-text>
+        <div v-if="regionChartLoading">
+          <v-col>
+            <v-progress-linear color="deep-purple accent-4" indeterminate rounded height="6"></v-progress-linear>
+          </v-col>
+        </div>
         <div id="region_chart"></div>
       </v-card-text>
     </v-card>
     <v-card>
-      <v-card-title v-if="currentRegion!=''">Repartition de la cave dans la region {{currentRegion}}</v-card-title>
+      <v-card-title v-if="currentRegion!=''">
+        Repartition de la cave dans la region
+        <a
+          class="ml-1"
+          href="$router.push('/regions/'+currentRegion)"
+        >{{currentRegion}}</a>
+      </v-card-title>
       <v-card-text>
+        <div v-if="areaChartLoading">
+          <v-col>
+            <v-progress-linear color="deep-purple accent-4" indeterminate rounded height="6"></v-progress-linear>
+          </v-col>
+        </div>
         <div id="area_chart"></div>
       </v-card-text>
     </v-card>
     <v-card>
-      <v-card-title v-if="currentRegion!='' && currentArea===''">Repartition des millésimes de la région {{currentRegion}}</v-card-title>
-      <v-card-title v-if="currentArea!=''">Repartition des millésimes de l'appelation {{currentArea}}</v-card-title>
+      <v-card-title v-if="currentRegion!='' && currentArea===''">
+        Repartition des millésimes de la région
+        <a
+          class="ml-1"
+          href="$router.push('/regions/'+currentRegion)"
+        >{{currentRegion}}</a>
+      </v-card-title>
+      <v-card-title v-if="currentArea!=''">
+        Repartition des millésimes de l'appelation
+        <a
+          class="ml-1"
+          href="$router.push('/areas/'+currentArea)"
+        >{{currentArea}}</a>
+      </v-card-title>
+      <v-card-title v-if="currentRegion!='' && currentArea!=''">
+        Repartition des millésimes de la cave
+      </v-card-title>
       <v-card-text>
+        <div v-if="vintageChartLoading">
+          <v-col>
+            <v-progress-linear color="deep-purple accent-4" indeterminate rounded height="6"></v-progress-linear>
+          </v-col>
+        </div>
         <div id="vintage_chart"></div>
       </v-card-text>
     </v-card>
   </v-list>
 </template>
 <script>
+import axios from "axios";
 import * as am4core from "@amcharts/amcharts4/core";
 import * as am4charts from "@amcharts/amcharts4/charts";
 
 export default {
-  props: [
-    "region_agg",
-    "area_agg",
-    "vintage_agg",
-    "region_vint_agg",
-    "area_vint_agg"
-  ],
+  props: [],
   data: () => ({
-    vintageColumnData: [],
-    areaPieData: [],
+    currentCellar: undefined,
+    // region_agg: undefined,
+    // area_agg: undefined,
     currentRegion: "",
     currentArea: "",
-    regionPie: undefined,
-    areaPie: undefined,
-    vintageColumn: undefined
+    regionChartLoading: false,
+    areaChartLoading: false,
+    vintageChartLoading: false
   }),
   mounted() {
     // RegionPie config
@@ -55,10 +87,9 @@ export default {
     pieSeries.slices.template.events.on(
       "hit",
       function(ev) {
-          this.currentArea = '';
         this.currentRegion = ev.target.dataItem.category;
-        this.areaPieData = this.area_agg[this.currentRegion];
-        this.vintageColumnData = this.region_vint_agg[this.currentRegion];
+        this.getAreaAgg(ev.target.dataItem.category);
+        this.getVintageAgg(ev.target.dataItem.category);
       },
       this
     );
@@ -75,13 +106,16 @@ export default {
       "hit",
       function(ev) {
         this.currentArea = ev.target.dataItem.category;
-        this.vintageColumnData = this.area_vint_agg[this.currentArea];
+        // this.vintageColumnData = this.area_vint_agg[this.currentArea];
+        this.getVintageAgg(ev.target.dataItem.category);
       },
       this
     );
     // VintageColumn Config
     this.vintageColumn = am4core.create("vintage_chart", am4charts.XYChart);
-    let categoryAxis = this.vintageColumn.xAxes.push(new am4charts.CategoryAxis());
+    let categoryAxis = this.vintageColumn.xAxes.push(
+      new am4charts.CategoryAxis()
+    );
     categoryAxis.dataFields.category = "vintage";
     categoryAxis.title.text = "Vintage";
     let valueAxis = this.vintageColumn.yAxes.push(new am4charts.ValueAxis());
@@ -91,22 +125,53 @@ export default {
     );
     vintageSeries.dataFields.valueY = "number";
     vintageSeries.dataFields.categoryX = "vintage";
+    this.getRegionAgg();
+    this.getVintageAgg("every_wines");
   },
   methods: {
-    showRegionPie() {
-      this.regionPie.data = this.region_agg;
+    async getRegionAgg() {
+      this.regionChartLoading = true;
+      const res = await axios.get("/statistics/region_agg", {
+        headers: { current_cellar_id: this.currentCellar.id }
+      });
+      console.log(res.data);
+      this.regionPie.data = res.data.region_agg;
+      this.regionChartLoading = false;
+    },
+    async getAreaAgg(region_name) {
+      this.areaChartLoading = true;
+      const res = await axios.get("/statistics/area_agg/" + region_name, {
+        headers: { current_cellar_id: this.currentCellar.id }
+      });
+      console.log(res.data);
+      this.areaPie.data = res.data.area_agg;
+      this.areaChartLoading = false;
+    },
+    async getVintageAgg(name) {
+      this.vintageChartLoading = true;
+      // it can be a area vintage aggregation or a region's
+      // that is why name is not precised
+      const res = await axios.get("/statistics/vintage_agg/" + name, {
+        headers: { current_cellar_id: this.currentCellar.id }
+      });
+      console.log(res.data);
+      this.vintageColumn.data = res.data.vintage_agg;
+      this.vintageChartLoading = false;
+    },
+    // showRegionPie() {
+    //    = this.region_agg;
 
-      // Add and configure Series
-    },
-    showAreaPie() {
-      if (this.areaPieData.length === undefined) {
-        this.areaPie.data = [this.areaPieData];
-      } else {
-        this.areaPie.data = this.areaPieData;
-      }
-    },
+    //   // Add and configure Series
+    // },
+    // showAreaPie() {
+    //   if (this.areaPieData.length === undefined) {
+    //      = [this.areaPieData];
+    //   } else {
+    //     this.areaPie.data = this.areaPieData;
+    //   }
+    // },
     showVintageColumn() {
-        console.log(this.vintageColumnData)
+      console.log(this.vintageColumnData);
       if (this.vintageColumnData.length === undefined) {
         this.vintageColumn.data = [this.vintageColumnData];
       } else {
@@ -115,18 +180,37 @@ export default {
     }
   },
   watch: {
-    region_agg: function() {
-      this.showRegionPie();
-    },
-    areaPieData: function() {
-      this.showAreaPie();
-    },
-    vintage_agg: function() {
-        this.vintageColumnData = this.vintage_agg;
-    },
-    vintageColumnData: function() {
-      this.showVintageColumn();
+    // region_agg: function() {
+    //   this.showRegionPie();
+    // },
+    // area_agg: function() {
+    //   this.showAreaPie()
+    // },
+    // areaPieData: function() {
+    //   this.showAreaPie();
+    // },
+    // vintage_agg: function() {
+    //   this.vintageColumnData = this.vintage_agg;
+    // },
+    // vintageColumnData: function() {
+    //   this.showVintageColumn();
+    // }
+  },
+  created() {
+    if (localStorage.getItem("current_cellar")) {
+      try {
+        this.currentCellar = JSON.parse(localStorage.getItem("current_cellar"));
+      } catch (e) {
+        localStorage.removeItem("current_cellar");
+      }
     }
   }
 };
 </script>
+
+<style scoped>
+a {
+  text-decoration: none;
+  color: #c6a47e;
+}
+</style>

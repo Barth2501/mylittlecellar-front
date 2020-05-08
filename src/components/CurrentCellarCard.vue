@@ -1,20 +1,23 @@
 <template>
-  <v-card color="#c6a47e63" outlined class="ma-4">
-    <v-list-item three-line>
+  <v-card color="#e6cfb5" outlined class="ma-4">
+    <v-list-item>
       <v-list-item-content>
-        <div class="overline mb-4">My cellar</div>
+        <div class="overline mb-4">Ma cave</div>
         <v-list-item-title
           v-if="currentCellar != undefined"
           class="headline mb-1"
         >{{ currentCellar.name }}</v-list-item-title>
       </v-list-item-content>
+      <v-list-item-avatar tile size="50" color="#a57034a1">
+        <v-img src="../assets/empty_barrel.png" />
+      </v-list-item-avatar>
     </v-list-item>
-    <v-row class="d-flex justify-start">
-      <v-col class="col-10">
-        <v-list rounded class="transparent">
+    <v-row class="d-flex justify-space-between py-0">
+      <v-col class="py-0">
+        <v-list v-if="renderCellarList" rounded class="transparent">
           <v-list-group color="primary">
             <template v-slot:activator>
-              <v-list-item-title>change cellar</v-list-item-title>
+              <h5>changer de cave</h5>
             </template>
             <v-list-item v-for="(cellar,i) in cellars" :key="i">
               <v-btn>
@@ -24,27 +27,23 @@
           </v-list-group>
         </v-list>
       </v-col>
-      <v-col class="d-flex  align-self-start" style="
-    padding-left: 0px;
-">
-        <v-icon @click="addCellarForm" class="mt-5">mdi-plus-circle-outline</v-icon>
+      <v-col class="d-flex align-self-start shrink mr-3">
+        <v-icon @click="addCellarForm" >mdi-plus-circle-outline</v-icon>
       </v-col>
     </v-row>
     <v-row justify="center">
-      <v-dialog v-model="addCellarDialog" max-width="290">
+      <v-dialog v-model="addCellarDialog" max-width="350">
         <v-card>
-          <v-card-title class="headline">Create a new cellar</v-card-title>
+          <v-card-title class="headline center">Créer une nouvelle cave</v-card-title>
 
-          <v-card-text>Please choose a name for your cellar</v-card-text>
+          <v-card-text class="center">Choisissez le nom de votre cave</v-card-text>
           <v-card-text>
             <v-text-field v-model="name" label="Name"></v-text-field>
           </v-card-text>
-          <v-card-actions>
-            <v-spacer></v-spacer>
+          <v-card-actions class="d-flex justify-center">
+            <v-btn color="green darken-1" text @click="addCellarDialog = false">Annuler</v-btn>
 
-            <v-btn color="green darken-1" text @click="addCellarDialog = false">Cancel</v-btn>
-
-            <v-btn color="green darken-1" text @click="addCellar">Add</v-btn>
+            <v-btn color="green darken-1" text @click="addCellar">Ajouter</v-btn>
           </v-card-actions>
         </v-card>
       </v-dialog>
@@ -52,7 +51,7 @@
     <v-row justify="center">
       <v-dialog v-model="chooseCellarDialog" max-width="290">
         <v-card>
-          <v-card-title class="headline">Choose your cellar</v-card-title>
+          <v-card-title class="headline">Choisissez votre cave</v-card-title>
           <v-list>
             <v-list-item v-for="(cellar,i) in cellars" :key="i">
               <v-list-item-content hover @click="changeCellar(cellar)">
@@ -77,7 +76,8 @@ export default {
     currentCellar: undefined,
     addCellarDialog: false,
     chooseCellarDialog: false,
-    name: ""
+    name: "",
+    renderCellarList: true
   }),
   mounted() {
     if (localStorage.getItem("current_cellar")) {
@@ -95,8 +95,8 @@ export default {
       this.currentCellar = cellar;
       localStorage.setItem("current_cellar", JSON.stringify(cellar));
       this.chooseCellarDialog = false;
-      this.cellarListState = false;
-      location.reload();
+      this.renderCellarList = false;
+      this.$nextTick(() => (this.renderCellarList = true));
     },
     getMyCellars() {
       axios.get("mycellars").then(res => {
@@ -116,7 +116,11 @@ export default {
         localStorage.setItem("current_cellar", JSON.stringify(res.data));
         this.getMyCellars();
         this.addCellarDialog = false;
-        location.reload();
+        this.renderCellarList = false;
+        this.currentCellar = res.data;
+        this.$nextTick(() => {
+          this.renderCellarList = true;
+        });
       });
     }
   },
@@ -126,4 +130,12 @@ export default {
 };
 </script>
 
-<style scoped></style>
+<style scoped>
+.shrink {
+  flex-grow: initial;
+}
+.center {
+  justify-content: center;
+  text-align: center;
+}
+</style>

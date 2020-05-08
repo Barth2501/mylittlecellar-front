@@ -1,5 +1,5 @@
 <template>
-  <v-card color="#c6a47e63" outlined class="ma-4" hover to="/profile">
+  <v-card color="#e6cfb5" outlined class="ma-4" hover to="/mycellar/stats">
     <v-list-item three-line>
       <v-list-item-content>
         <div class="overline mb-4">Compte</div>
@@ -11,8 +11,8 @@
         </v-list-item-subtitle>
       </v-list-item-content>
 
-      <v-list-item-avatar tile size="80" color="#a57034a1">
-        <span class="white--text headline"><b>{{ profile.username[0] }}</b></span>
+      <v-list-item-avatar tile size="50" color="#a57034a1">
+        <v-img src="../assets/grapes.png" />
       </v-list-item-avatar>
     </v-list-item>
 

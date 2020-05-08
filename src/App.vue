@@ -22,10 +22,10 @@
 
     <template v-else>
       <v-navigation-drawer
-        color="#e69c4736"
+        color="#faead8"
         v-model="drawer"
         app
-        width="300"
+        width="320"
         clipped
         class="elevation-4 background"
       >
@@ -68,13 +68,12 @@
             </v-list-item>
           </template>
         </v-list>
-
-        <v-btn color="error" text absolute block bottom @click="logout">Deconnexion</v-btn>
       </v-navigation-drawer>
 
       <v-app-bar
-        color="#a57034a1"
+        color="#c6a47e"
         app
+        dense
         class="background elevation-2 px-4"
         height="112"
         clipped-left
@@ -83,13 +82,17 @@
 
         <v-toolbar-title>
           <img
-            src="./assets/wine_glass.png"
+            src="./assets/custom_Logo.png"
             alt="logo"
             class="mb-2"
             style="height: 75px; display: block"
             @click="$router.push('/')"
           />
         </v-toolbar-title>
+        <v-spacer></v-spacer>
+        <RegionAreaSearchbar />
+        <v-spacer></v-spacer>
+        <v-btn color="error"  @click="logout">Deconnexion</v-btn>
       </v-app-bar>
 
       <v-content class="background">
@@ -109,11 +112,12 @@ import auth from "./modules/auth";
 import LoginPage from "./pages/AuthPage.vue";
 import ProfileSummaryCard from "./components/ProfileSummaryCard.vue";
 import CurrentCellarCard from "./components/CurrentCellarCard.vue";
+import RegionAreaSearchbar from "./components/RegionAreaSearchbar.vue";
 
 export default {
   name: "App",
 
-  components: { LoginPage, ProfileSummaryCard, CurrentCellarCard },
+  components: { LoginPage, ProfileSummaryCard, CurrentCellarCard, RegionAreaSearchbar },
 
   data: () => ({
     profile: false,
@@ -124,24 +128,25 @@ export default {
     },
     nav: [
       {
-        text: "Wines",
+        text: "Vins",
         asset: "magnify.png",
-        sub_nav: [{ text: "Look for a wine", path: "/" }]
+        sub_nav: [{ text: "Chercher une bouteille", path: "/" }]
       },
       {
-        text: "My Cellar",
+        text: "Ma cave",
         asset: "cellar.png",
         sub_nav: [
+          { text: "Chercher dans ma cave", path: "/lookmywines"},
           { text: "Livret de cave", path: "/mycellar" },
           { text: "Statistiques", path: "/mycellar/stats" }
         ]
       },
       {
-        text: "My recipes",
+        text: "Mes recettes",
         asset: "recipes.png",
         sub_nav: [
-          { text: "Match a recipe", path: "/myrecipes" },
-          { text: "Match a bottle", path: "/myrecipes" }
+          { text: "De la cuisine aux vins", path: "/recipes_to_wines" },
+          { text: "Des vins à la cuisine", path: "/wines_to_recipes" }
         ]
       }
     ]
