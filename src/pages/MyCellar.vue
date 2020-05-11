@@ -10,7 +10,7 @@
 
     <v-col v-if="loading">
       <v-row class="d-flex justify-center">
-        <h2>Your wines are loading ...</h2>
+        <h2>Vos vins sont en train d'être chargés ...</h2>
       </v-row>
       <v-row class="row-1 d-flex align-content-start flex-wrap">
         <v-col class="col-1" v-for="i in nbBottles" :key="i">

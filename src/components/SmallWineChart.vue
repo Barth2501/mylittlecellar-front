@@ -11,6 +11,7 @@
     :fill="fill"
     :type="type"
     :auto-line-width="autoLineWidth"
+    :show-labels="true"
     auto-draw
     :height="height"
     :label-size="label_size"

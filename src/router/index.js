@@ -10,6 +10,7 @@ import WineryPage from '../pages/WineryPage.vue';
 import AreaPage from '../pages/AreaPage.vue';
 import RegionPage from '../pages/RegionPage.vue';
 import LookMyWines from '../pages/LookMyWines.vue';
+import WinePage from '../pages/WinePage.vue';
 
 Vue.use(Router);
 
@@ -61,6 +62,11 @@ const router = new Router({
       path: '/regions/:region_name',
       name: 'region',
       component: RegionPage,
+    },
+    {
+      path: '/wines/:wine_id',
+      name: 'wine',
+      component: WinePage,
     },
     {
       path: '/winedecider',

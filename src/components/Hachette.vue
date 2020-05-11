@@ -35,6 +35,7 @@
 
     <v-card
       v-if="winery_name===''"
+      :key="winery_name"
       class="d-flex justify-center mt-5"
       elevation="0"
       color="#d05f4f40"

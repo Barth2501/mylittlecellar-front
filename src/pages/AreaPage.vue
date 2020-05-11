@@ -1,5 +1,5 @@
 <template>
-  <v-app class="auth px-4 py-4">
+  <v-app class="auth px-4 py-4" v-if="area!=undefined">
     <v-row class="shrink">
       <v-col class="col-7">
         <v-card>
@@ -30,8 +30,8 @@
 
     <v-item-group v-if="renderList">
       <v-container>
-        <v-row class='justify-center'>
-          <v-col class='item-col' v-for="(item,i) in itemsList" :key="i">
+        <v-row class="justify-center">
+          <v-col class="item-col" v-for="(item,i) in itemsList" :key="i">
             <v-item v-slot:default="{ active,toggle }">
               <v-card
                 :color="active ? '#9826ac' : ''"
@@ -58,7 +58,7 @@
 
     <v-item-group>
       <v-container>
-        <v-row class='justify-center'>
+        <v-row class="justify-center">
           <v-col class="grape-col" v-for="(grape,i) in area.grapes" :key="i">
             <v-item v-slot:default="{ active,toggle }">
               <v-card
@@ -86,19 +86,31 @@
     <div>
       <p>{{grapeDesc}}</p>
     </div>
-    <v-card v-for="(winery,i) in area.winery" :key="i" outlined>
+    <div v-if="wineries!=undefined">
+    <v-card v-for="(winery,i) in wineries" :key="i" outlined @click="$router.push('/wineries/'+i)">
       <v-row class="d-flex justify-space-around">
-        <v-col class="ml-5 col-2">
+        <v-col class="ml-5 shrink">
           <v-img src="../assets/vineyards.png" width="50" heigth="50" />
         </v-col>
         <v-col class="ma-2 col-6 d-flex justify-start">
           <h3 class="d-flex wine-name justify-center col-7">{{winery.name}}</h3>
         </v-col>
-        <v-col class="ma-2 col-3 d-flex wine-name justify-center">
-          <h4>You have {{winery.wines_nb}} bottle(s) from this winery</h4>
+        <v-col class="ma-2 col-4 d-flex wine-name justify-center">
+          <h4>Vous possédez {{winery.number}} bouteille(s) de ce domaine</h4>
         </v-col>
       </v-row>
     </v-card>
+    </div>
+    <div v-else>
+      <v-col class='text-center'>
+      <v-progress-circular color="deep-purple accent-4" indeterminate rounded height="20"></v-progress-circular>
+    </v-col>
+    </div>
+  </v-app>
+  <v-app v-else>
+    <v-col class='text-center'>
+      <v-progress-circular color="deep-purple accent-4" indeterminate rounded height="20"></v-progress-circular>
+    </v-col>
   </v-app>
 </template>
 <script>
@@ -114,11 +126,12 @@ export default {
     trueItemsList: [],
     itemsList: [],
     itemDesc: "",
-    renderList: false
+    renderList: false,
+    wineries: undefined
   }),
   methods: {
     getArea() {
-      this.renderList=false;
+      this.renderList = false;
       const area_name = this.$route.params.area_name;
       axios
         .get("/areas/" + area_name, {
@@ -151,9 +164,21 @@ export default {
             this.itemsList.push("food");
             this.trueItemsList.push("Plats");
           }
-          this.$nextTick(()=>{this.renderList=true;
-          this.itemDesc=this.area.info.description})
+          this.$nextTick(() => {
+            this.renderList = true;
+            this.itemDesc = this.area.info.description;
+          });
+          this.getWineries();
         });
+    },
+    async getWineries() {
+      const res = await axios.get("/mywineries/" + this.area.id, {
+        headers: { current_cellar_id: this.currentCellar.id }
+      });
+      console.log(res.data);
+      this.$nextTick(() => {
+        this.wineries = res.data;
+      });
     },
     grapeDescription(grape) {
       this.grapeDesc = grape.description;
@@ -210,12 +235,12 @@ a.region {
 }
 
 .item-col {
-    max-width: fit-content;
+  max-width: fit-content;
 }
 .shrink {
-    flex-grow: initial;
+  flex-grow: initial;
 }
 .grape-col {
-    max-width: 175px;
+  max-width: 175px;
 }
 </style>
